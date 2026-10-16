@@ -114,9 +114,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	mongoClient, err := mongo.Connect(
-		options.Client().ApplyURI("mongodb://localhost:27017"),
-	)
+	mongoURI := os.Getenv("MONGODB_URI")
+if mongoURI == "" {
+    mongoURI = "mongodb://localhost:27017"
+}
+
+mongoClient, err := mongo.Connect(
+    options.Client().ApplyURI(mongoURI),
+)
 	if err != nil {
 		log.Fatal("MongoDB connection failed: ", err)
 	}
@@ -126,7 +131,12 @@ func main() {
 	defer mongoClient.Disconnect(context.Background())
 	log.Println("MongoDB connected successfully")
 
-	redisClient := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	redisAddr := os.Getenv("REDIS_ADDR")
+if redisAddr == "" {
+    redisAddr = "localhost:6379"
+}
+
+redisClient := redis.NewClient(&redis.Options{Addr: redisAddr})
 	if err := redisClient.Ping(ctx).Err(); err != nil {
 		log.Fatal("Redis connection failed: ", err)
 	}
@@ -370,7 +380,12 @@ func main() {
 		})
 	})
 
-	if err := router.Run(":8080"); err != nil {
-		log.Fatal("Server failed: ", err)
-	}
+	port := os.Getenv("PORT")
+if port == "" {
+    port = "8080"
+}
+
+if err := router.Run(":" + port); err != nil {
+    log.Fatal("Server failed: ", err)
+}
 }
