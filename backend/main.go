@@ -131,12 +131,23 @@ mongoClient, err := mongo.Connect(
 	defer mongoClient.Disconnect(context.Background())
 	log.Println("MongoDB connected successfully")
 
-	redisAddr := os.Getenv("REDIS_ADDR")
-if redisAddr == "" {
-    redisAddr = "localhost:6379"
-}
+	redisURL := os.Getenv("REDIS_URL")
 
-redisClient := redis.NewClient(&redis.Options{Addr: redisAddr})
+var redisClient *redis.Client
+
+if redisURL != "" {
+    redisOptions, err := redis.ParseURL(redisURL)
+    if err != nil {
+        log.Fatal("Invalid Redis URL: ", err)
+    }
+    redisClient = redis.NewClient(redisOptions)
+} else {
+    redisAddr := os.Getenv("REDIS_ADDR")
+    if redisAddr == "" {
+        redisAddr = "localhost:6379"
+    }
+    redisClient = redis.NewClient(&redis.Options{Addr: redisAddr})
+}
 	if err := redisClient.Ping(ctx).Err(); err != nil {
 		log.Fatal("Redis connection failed: ", err)
 	}
