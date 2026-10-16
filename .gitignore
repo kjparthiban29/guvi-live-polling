@@ -1,0 +1,18 @@
+﻿# Dependencies and build output
+frontend/node_modules/
+frontend/dist/
+backend/vendor/
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
